@@ -1,14 +1,13 @@
 // Testkommentar check
-
+require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-
 const app = express();
 app.use(express.json());
 
-const DATA_FILE = path.join(__dirname, 'data.json');
-
+const DATA_FILE = process.env.FILE_PATH
+const PORT= process.env.PORT
 
 const readData = () => {
   if (fs.existsSync(DATA_FILE)) {
@@ -87,7 +86,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 
-const PORT = 3000;
+//const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
 });
