@@ -29,7 +29,7 @@ app.get('/todos', (req, res) => {
   const todos = readData();
   res.json(todos);
 } catch (error){
-  res.status(500).json ({error: 'Failed to find datafile', details: error.message});
+  res.status(500).json ({error: 'Error:404 Failed to find datafile', details: error.message});
 }
 });
 
@@ -37,10 +37,11 @@ app.get('/todos', (req, res) => {
 
 app.post('/todos', (req, res) => {
   try { 
+    let todos=[];
     if (fs.existsSync(DATA_FILE)) {
-      throw new Error('I see double');
+      todos=readData();
     }
-  const todos = [];
+  
   const newTodo = { id: Date.now(), title: req.body.title, completed: false };
   todos.push(newTodo);
   writeData(todos);
@@ -60,12 +61,12 @@ app.put('/todos/:id', (req, res) => {
       
       todos[index] = { ...todos[index], ...req.body };
       writeData(todos);
-      res.json(todos[index]); 
+      res.status(200).json(todos[index]); 
     } else {
-      res.status(404).json({ error: 'Todo not found' });
+      res.status(404).json({ error: 'Todo ID not found' });
     }
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update task', details: error.message });
+    res.status(500).json({ error: 'Error 400: Failed to update task', details: error.message });
   }
 });
 
@@ -92,7 +93,7 @@ app.delete('/todos/:id', (req, res) => {
 });
 
 
-//const PORT = 3000;
+
 app.listen(PORT, () => {
   console.log(`Server is running on ${PORT}`);
 });
