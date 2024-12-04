@@ -23,6 +23,9 @@ const writeData = (data) => {
 
 app.get('/todos', (req, res) => {
   try{ 
+    if (!fs.existsSync(DATA_FILE)) {
+      throw new Error('I cant see');
+    }
   const todos = readData();
   res.json(todos);
 } catch (error){
@@ -34,13 +37,16 @@ app.get('/todos', (req, res) => {
 
 app.post('/todos', (req, res) => {
   try { 
-  const todos = readData();
+    if (fs.existsSync(DATA_FILE)) {
+      throw new Error('I see double');
+    }
+  const todos = [];
   const newTodo = { id: Date.now(), title: req.body.title, completed: false };
   todos.push(newTodo);
   writeData(todos);
   res.status(201).json(newTodo);
   } catch(error) {
-    res.status(500).json({error: 'Failed to create task', details: error.message});
+    res.status(500).json({error: 'Failed to create file', details: error.message});
   }
     
 });
@@ -65,7 +71,7 @@ app.put('/todos/:id', (req, res) => {
 
 
 app.delete('/todos/:id', (req, res) => {
-  try {
+  try {3
     const todos = readData();
     const id = parseInt(req.params.id);
 

@@ -1,19 +1,7 @@
 [
   {
-    "id": 1733228209253,
-    "completed": true,
-    "title": "Buy bananas",
-    "test": " "
-  },
-  {
-    "id": 1733229283395,
-    "title": "the garbage is full",
-    "completed": false,
-    "extra": "the sink"
-  },
-  {
-    "id": 1733236625867,
-    "title": "Clean FULL house",
+    "id": 1733308858507,
+    "title": "Oranges",
     "completed": false
   }
 ]
