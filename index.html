@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+</head>
+<body>
+    <button id="getTodosBtn">Get Todos</button>
+    <div id="todoList"></div>
+
+    <form id="addTodoForm">
+        <input type="text" name="title" placeholder="Todo Title" required>
+        <button type="submit">Add Todo</button>
+    </form>
+
+    <form id="updateTodoForm">
+        <input type="text" name="updateId" placeholder="Todo ID" required>
+        <input type="text" name="updateTitle" placeholder="New Title" required>
+        <label>
+            Completed:
+            <input type="checkbox" name="updateCompleted">
+        </label>
+        <button type="submit">Update Todo</button>
+    </form>
+
+    <form id="deleteTodoForm">
+        <input type="text" name="deleteId" placeholder="Todo ID" required>
+        <button type="submit">Delete Todo</button>
+    </form>
+
+    <!-- Include the script -->
+    <script src="public/scripts.js"></script>
+</body>
+</html>
