@@ -1,9 +1,13 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const Todo = require('./models/todo'); // Import the Todo model
 const connectDB = require('./db'); // Import the DB connection function
-
 const app = express();
+
+app.use(cors());
+
+
 app.use(express.json());
 
 // Connect to MongoDB
