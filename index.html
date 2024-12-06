@@ -4,6 +4,103 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Todo List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      padding: 20px;
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #getTodosBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    #getTodosBtn:hover {
+      background-color: #45a049;
+    }
+
+    #addTodoBtn {
+      background-color: #2196F3;
+      color: white;
+    }
+
+    #addTodoBtn:hover {
+      background-color: #0b7dda;
+    }
+
+    #updateTodoBtn {
+      background-color: #FF9800;
+      color: white;
+    }
+
+    #updateTodoBtn:hover {
+      background-color: #e68900;
+    }
+
+    #deleteTodoBtn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    #deleteTodoBtn:hover {
+      background-color: #da190b;
+    }
+
+    input[type="text"], input[type="checkbox"] {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    input[type="checkbox"] {
+      margin-top: 10px;
+    }
+
+    div {
+      margin: 20px;
+      text-align: center;
+    }
+
+    #todoList {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #todoList div {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #todoList div:last-child {
+      border-bottom: none;
+    }
+  </style>
 </head>
 <body>
   <h1>Todo List</h1>
