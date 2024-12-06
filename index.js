@@ -3,22 +3,21 @@ const express = require('express');
 const cors = require('cors');
 const Todo = require('./models/todo');
 const connectDB = require('./db');
-const app = express();
 const path = require('path');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
 connectDB();
 
-const PORT = process.env.PORT || 3000;
-
-// Serve the HTML file
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API Endpoints
+
 app.get('/todos', async (req, res) => {
   try {
     const todos = await Todo.find();
@@ -52,7 +51,7 @@ app.put('/todos/:id', async (req, res) => {
 
 app.delete('/todos/:id', async (req, res) => {
   try {
-    const deletedTodo = await Todo.findByIdAndDelete(req.params.id);
+    await Todo.findByIdAndDelete(req.params.id);
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete todo', details: error.message });

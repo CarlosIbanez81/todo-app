@@ -81,44 +81,35 @@
 
   <h1>Todo List</h1>
 
-  <!-- Buttons -->
   <button id="getTodosBtn">Get Todos</button>
-
-  <!-- Input to add a new todo -->
   <input type="text" id="todoTitle" placeholder="Enter todo title">
   <button id="addTodoBtn">Add Todo</button>
-
-  <!-- Inputs to update or delete a todo -->
   <input type="text" id="todoId" placeholder="Enter todo ID">
   <input type="checkbox" id="todoCompleted">Completed
   <button id="updateTodoBtn">Update Todo</button>
   <button id="deleteTodoBtn">Delete Todo</button>
 
-  <!-- Todo List will be rendered here -->
   <div id="todoList"></div>
 
   <script>
     const API_URL = 'http://localhost:3000';
 
-// Fetch and render todos
-document.getElementById('getTodosBtn').addEventListener('click', async () => {
-  try {
-    const res = await fetch(`${API_URL}/todos`);
-    const todos = await res.json();
+    document.getElementById('getTodosBtn').addEventListener('click', async () => {
+      try {
+        const res = await fetch(`${API_URL}/todos`);
+        const todos = await res.json();
 
-    const todoList = document.getElementById('todoList');
-    todoList.innerHTML = todos.map(todo =>
-      `<div class="todo-item ${todo.completed ? 'completed' : ''}">
-        <strong>ID:</strong> ${todo._id} - ${todo.title}
-      </div>`
-    ).join('');
+        const todoList = document.getElementById('todoList');
+        todoList.innerHTML = todos.map(todo =>
+          `<div class="todo-item ${todo.completed ? 'completed' : ''}">
+            <strong>ID:</strong> ${todo._id} - ${todo.title}
+          </div>`
+        ).join('');
+      } catch (error) {
+        console.error('Failed to fetch todos:', error);
+      }
+    });
 
-  } catch (error) {
-    console.error('Failed to fetch todos:', error);
-  }
-});
-
-    // Add a new todo
     document.getElementById('addTodoBtn').addEventListener('click', async () => {
       const title = document.getElementById('todoTitle').value;
       if (title) {
@@ -129,7 +120,6 @@ document.getElementById('getTodosBtn').addEventListener('click', async () => {
             body: JSON.stringify({ title })
           });
           const newTodo = await res.json();
-
           console.log('Added todo:', newTodo);
           document.getElementById('todoTitle').value = '';
         } catch (error) {
@@ -138,7 +128,6 @@ document.getElementById('getTodosBtn').addEventListener('click', async () => {
       }
     });
 
-    // Update a todo by ID
     document.getElementById('updateTodoBtn').addEventListener('click', async () => {
       const id = document.getElementById('todoId').value;
       const completed = document.getElementById('todoCompleted').checked;
@@ -151,7 +140,6 @@ document.getElementById('getTodosBtn').addEventListener('click', async () => {
             body: JSON.stringify({ completed })
           });
           const updatedTodo = await res.json();
-
           console.log('Updated todo:', updatedTodo);
         } catch (error) {
           console.error('Failed to update todo:', error);
@@ -159,7 +147,6 @@ document.getElementById('getTodosBtn').addEventListener('click', async () => {
       }
     });
 
-    // Delete a todo by ID
     document.getElementById('deleteTodoBtn').addEventListener('click', async () => {
       const id = document.getElementById('todoId').value;
 

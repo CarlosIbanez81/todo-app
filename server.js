@@ -1,57 +1,93 @@
-require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
 
 const app = express();
+const PORT = 3000;
+
+mongoose.connect('mongodb://localhost:27017/todo', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+mongoose.connect('mongodb://localhost:27017/secrettodo', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+const dbTodo = mongoose.connection.useDb('todo');
+const dbSecretTodo = mongoose.connection.useDb('secrettodo');
+
+const TodoSchema = new mongoose.Schema({
+  title: String,
+  completed: Boolean
+});
+
+const Todo = dbTodo.model('Todo', TodoSchema);
+const SecretTodo = dbSecretTodo.model('Todo', TodoSchema);
+
+const PASSWORD = 'secret';
+
 app.use(bodyParser.json());
 
-// Middleware for CORS
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*'); // Allow all origins
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+function authenticate(req, res, next) {
+  const password = req.headers['x-password'];
+  if (password === PASSWORD) {
     next();
-});
-
-// Login route
-app.post('/login', (req, res) => {
-    const { password } = req.body;
-    const storedPassword = process.env.SECRET_PASSWORD;
-
-    if (password !== storedPassword) {
-        return res.status(401).json({ error: "Incorrect password" });
-    }
-
-    const token = jwt.sign({ access: 'granted' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-});
-
-// Protected route
-app.get('/protected', authenticateToken, (req, res) => {
-    res.json({ secret: "This is protected data" });
-});
-
-// Root route
-app.get('/', (req, res) => {
-    res.send('Welcome to the API! Use /todos, /login, or other endpoints.');
-});
-
-// Middleware for authentication
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) return res.status(401).json({ error: "Access Denied" });
-
-    jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-        if (err) return res.status(403).json({ error: "Invalid Token" });
-        next();
-    });
+  } else {
+    return res.status(403).json({ error: 'Unauthorized access to secret database' });
+  }
 }
 
-// Start the server
-const PORT = process.env.PORT || 3000;
+app.get('/:database/todos', async (req, res) => {
+  const { database } = req.params;
+  try {
+    const model = database === 'secrettodo' ? SecretTodo : Todo;
+    const todos = await model.find();
+    res.status(200).json(todos);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch todos' });
+  }
+});
+
+app.post('/:database/todos', async (req, res) => {
+  const { database } = req.params;
+  const { title } = req.body;
+
+  try {
+    const model = database === 'secrettodo' ? SecretTodo : Todo;
+    const newTodo = new model({ title, completed: false });
+    await newTodo.save();
+    res.status(201).json(newTodo);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add todo' });
+  }
+});
+
+app.put('/:database/todos/:id', async (req, res) => {
+  const { database, id } = req.params;
+  const { completed } = req.body;
+
+  try {
+    const model = database === 'secrettodo' ? SecretTodo : Todo;
+    const updatedTodo = await model.findByIdAndUpdate(id, { completed }, { new: true });
+    res.status(200).json(updatedTodo);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update todo' });
+  }
+});
+
+app.delete('/:database/todos/:id', async (req, res) => {
+  const { database, id } = req.params;
+
+  try {
+    const model = database === 'secrettodo' ? SecretTodo : Todo;
+    await model.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Todo deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete todo' });
+  }
+});
+
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
