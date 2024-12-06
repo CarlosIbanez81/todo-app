@@ -75,24 +75,60 @@
       text-decoration: line-through;
       color: grey;
     }
+    .password-section {
+      margin: 10px;
+    }
   </style>
 </head>
 <body>
 
   <h1>Todo List</h1>
 
+  <div class="password-section">
+    <input type="password" id="passwordInput" placeholder="Enter Password">
+    <button id="authenticateBtn">Authenticate</button>
+  </div>
+
   <button id="getTodosBtn">Get Todos</button>
   <input type="text" id="todoTitle" placeholder="Enter todo title">
   <button id="addTodoBtn">Add Todo</button>
   <input type="text" id="todoId" placeholder="Enter todo ID">
-  <input type="checkbox" id="todoCompleted">Completed
+  <input type="checkbox" id="todoCompleted"> Completed
   <button id="updateTodoBtn">Update Todo</button>
   <button id="deleteTodoBtn">Delete Todo</button>
+
+  <button id="getSecretDataBtn" style="display:none;">Get Secret Data</button>
 
   <div id="todoList"></div>
 
   <script>
     const API_URL = 'http://localhost:3000';
+
+    let isAuthenticated = false;
+
+    document.getElementById('authenticateBtn').addEventListener('click', async () => {
+      const password = document.getElementById('passwordInput').value;
+
+      try {
+        const res = await fetch(`${API_URL}/authenticate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const result = await res.json();
+
+        if (res.ok && result.authenticated) {
+          isAuthenticated = true;
+          document.getElementById('getSecretDataBtn').style.display = 'inline';
+          alert('Authentication successful! You can now access secret data.');
+        } else {
+          alert('Incorrect password. Try again.');
+        }
+      } catch (error) {
+        console.error('Authentication error:', error);
+      }
+    });
 
     document.getElementById('getTodosBtn').addEventListener('click', async () => {
       try {
@@ -103,8 +139,7 @@
         todoList.innerHTML = todos.map(todo =>
           `<div class="todo-item ${todo.completed ? 'completed' : ''}">
             <strong>ID:</strong> ${todo._id} - ${todo.title}
-          </div>`
-        ).join('');
+          </div>`).join('');
       } catch (error) {
         console.error('Failed to fetch todos:', error);
       }
@@ -156,6 +191,18 @@
           console.log('Deleted todo with ID:', id);
         } catch (error) {
           console.error('Failed to delete todo:', error);
+        }
+      }
+    });
+
+    document.getElementById('getSecretDataBtn').addEventListener('click', async () => {
+      if (isAuthenticated) {
+        try {
+          const res = await fetch(`${API_URL}/secret-data`);
+          const secretData = await res.json();
+          console.log('Secret Data:', secretData);
+        } catch (error) {
+          console.error('Failed to get secret data:', error);
         }
       }
     });

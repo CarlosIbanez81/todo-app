@@ -1,93 +1,81 @@
+require('dotenv').config();
 const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
+const cors = require('cors');
+const Todo = require('./models/todo');
+const connectDB = require('./db');
+const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-mongoose.connect('mongodb://localhost:27017/todo', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-mongoose.connect('mongodb://localhost:27017/secrettodo', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+const SECRET_PASSWORD = process.env.SECRET_PASSWORD;
+console.log('Backend secret password:', SECRET_PASSWORD);
 
-const dbTodo = mongoose.connection.useDb('todo');
-const dbSecretTodo = mongoose.connection.useDb('secrettodo');
+app.use(cors());
+app.use(express.json());
 
-const TodoSchema = new mongoose.Schema({
-  title: String,
-  completed: Boolean
+connectDB();
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-const Todo = dbTodo.model('Todo', TodoSchema);
-const SecretTodo = dbSecretTodo.model('Todo', TodoSchema);
-
-const PASSWORD = 'secret';
-
-app.use(bodyParser.json());
-
-function authenticate(req, res, next) {
-  const password = req.headers['x-password'];
-  if (password === PASSWORD) {
-    next();
-  } else {
-    return res.status(403).json({ error: 'Unauthorized access to secret database' });
-  }
-}
-
-app.get('/:database/todos', async (req, res) => {
-  const { database } = req.params;
+app.get('/todos', async (req, res) => {
   try {
-    const model = database === 'secrettodo' ? SecretTodo : Todo;
-    const todos = await model.find();
-    res.status(200).json(todos);
+    const todos = await Todo.find();
+    res.json(todos);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch todos' });
+    res.status(500).json({ error: 'Failed to fetch todos', details: error.message });
   }
 });
 
-app.post('/:database/todos', async (req, res) => {
-  const { database } = req.params;
-  const { title } = req.body;
-
+app.post('/todos', async (req, res) => {
   try {
-    const model = database === 'secrettodo' ? SecretTodo : Todo;
-    const newTodo = new model({ title, completed: false });
+    const newTodo = new Todo({
+      title: req.body.title,
+      completed: false,
+    });
     await newTodo.save();
     res.status(201).json(newTodo);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to add todo' });
+    res.status(500).json({ error: 'Failed to create todo', details: error.message });
   }
 });
 
-app.put('/:database/todos/:id', async (req, res) => {
-  const { database, id } = req.params;
-  const { completed } = req.body;
-
+app.put('/todos/:id', async (req, res) => {
   try {
-    const model = database === 'secrettodo' ? SecretTodo : Todo;
-    const updatedTodo = await model.findByIdAndUpdate(id, { completed }, { new: true });
+    const updatedTodo = await Todo.findByIdAndUpdate(req.params.id, { completed: req.body.completed }, { new: true });
     res.status(200).json(updatedTodo);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update todo' });
+    res.status(500).json({ error: 'Failed to update todo', details: error.message });
   }
 });
 
-app.delete('/:database/todos/:id', async (req, res) => {
-  const { database, id } = req.params;
-
+app.delete('/todos/:id', async (req, res) => {
   try {
-    const model = database === 'secrettodo' ? SecretTodo : Todo;
-    await model.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Todo deleted' });
+    const deletedTodo = await Todo.findByIdAndDelete(req.params.id);
+    res.status(204).send();
   } catch (error) {
-    res.status(500).json({ error: 'Failed to delete todo' });
+    res.status(500).json({ error: 'Failed to delete todo', details: error.message });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.post('/authenticate', (req, res) => {
+  const { password } = req.body;
+
+  if (password === SECRET_PASSWORD) {
+    res.status(200).json({ message: 'Authentication successful' });
+  } else {
+    res.status(401).json({ message: 'Incorrect password' });
+  }
 });
+
+app.get('/secret-data', (req, res) => {
+  if (req.headers.authorization === SECRET_PASSWORD) {
+    res.status(200).json({ secret: 'This is confidential data!' });
+  } else {
+    res.status(403).json({ message: 'Unauthorized access' });
+  }
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
