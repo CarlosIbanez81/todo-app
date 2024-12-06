@@ -1,23 +1,20 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const Todo = require('./models/todo'); // Import the Todo model
-const connectDB = require('./db'); // Import the DB connection function
+const Todo = require('./models/todo');
+const connectDB = require('./db');
 const app = express();
 
 app.use(cors());
-
-
 app.use(express.json());
 
-// Connect to MongoDB
 connectDB();
 
 const PORT = process.env.PORT || 3000;
 
 app.get('/todos', async (req, res) => {
   try {
-    const todos = await Todo.find(); // Fetch all todos from MongoDB
+    const todos = await Todo.find();
     res.json(todos);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching todos', details: error.message });
@@ -30,8 +27,7 @@ app.post('/todos', async (req, res) => {
       title: req.body.title,
       completed: false,
     });
-    
-    await newTodo.save(); // Save the new todo to MongoDB
+    await newTodo.save();
     res.status(201).json(newTodo);
   } catch (error) {
     res.status(500).json({ error: 'Failed to create todo', details: error.message });

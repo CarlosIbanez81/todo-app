@@ -8,8 +8,17 @@
 <body>
   <h1>Todo List</h1>
   <button id="getTodosBtn">Get Todos</button>
-  <div id="todosContainer"></div>
-
+  <div>
+    <input type="text" id="todoTitle" placeholder="Enter todo title">
+    <button id="addTodoBtn">Add Todo</button>
+  </div>
+  <div>
+    <input type="text" id="todoId" placeholder="Enter todo ID for update/delete">
+    <input type="checkbox" id="todoCompleted"> Completed
+    <button id="updateTodoBtn">Update Todo</button>
+    <button id="deleteTodoBtn">Delete Todo</button>
+  </div>
+  <div id="todoList"></div>
   <script src="script.js"></script>
 </body>
 </html>
