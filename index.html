@@ -11,15 +11,12 @@
       margin: 0;
       padding: 0;
     }
-
     h1 {
       text-align: center;
-      color: #333;
+      color: #fff;
       padding: 20px;
       background-color: #4CAF50;
-      color: white;
     }
-
     button {
       padding: 10px 20px;
       margin: 5px;
@@ -28,60 +25,39 @@
       cursor: pointer;
       font-size: 16px;
     }
-
     #getTodosBtn {
       background-color: #4CAF50;
       color: white;
     }
-
     #getTodosBtn:hover {
       background-color: #45a049;
     }
-
     #addTodoBtn {
       background-color: #2196F3;
       color: white;
     }
-
     #addTodoBtn:hover {
       background-color: #0b7dda;
     }
-
     #updateTodoBtn {
       background-color: #FF9800;
       color: white;
     }
-
     #updateTodoBtn:hover {
       background-color: #e68900;
     }
-
     #deleteTodoBtn {
       background-color: #f44336;
       color: white;
     }
-
     #deleteTodoBtn:hover {
       background-color: #da190b;
     }
-
     input[type="text"], input[type="checkbox"] {
       padding: 8px;
       margin: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
       font-size: 16px;
     }
-
-    input[type="checkbox"] {
-      margin-top: 10px;
-    }
-
-    div {
-      margin: 20px;
-      text-align: center;
-    }
-
     #todoList {
       max-width: 600px;
       margin: 20px auto;
@@ -90,32 +66,113 @@
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
-
-    #todoList div {
+    .todo-item {
       padding: 10px;
       margin-bottom: 10px;
       border-bottom: 1px solid #ddd;
     }
-
-    #todoList div:last-child {
-      border-bottom: none;
+    .todo-item.completed {
+      text-decoration: line-through;
+      color: grey;
     }
   </style>
 </head>
 <body>
+
   <h1>Todo List</h1>
+
+  <!-- Buttons -->
   <button id="getTodosBtn">Get Todos</button>
-  <div>
-    <input type="text" id="todoTitle" placeholder="Enter todo title">
-    <button id="addTodoBtn">Add Todo</button>
-  </div>
-  <div>
-    <input type="text" id="todoId" placeholder="Enter todo ID for update/delete">
-    <input type="checkbox" id="todoCompleted"> Completed
-    <button id="updateTodoBtn">Update Todo</button>
-    <button id="deleteTodoBtn">Delete Todo</button>
-  </div>
+
+  <!-- Input to add a new todo -->
+  <input type="text" id="todoTitle" placeholder="Enter todo title">
+  <button id="addTodoBtn">Add Todo</button>
+
+  <!-- Inputs to update or delete a todo -->
+  <input type="text" id="todoId" placeholder="Enter todo ID">
+  <input type="checkbox" id="todoCompleted">Completed
+  <button id="updateTodoBtn">Update Todo</button>
+  <button id="deleteTodoBtn">Delete Todo</button>
+
+  <!-- Todo List will be rendered here -->
   <div id="todoList"></div>
-  <script src="script.js"></script>
+
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+// Fetch and render todos
+document.getElementById('getTodosBtn').addEventListener('click', async () => {
+  try {
+    const res = await fetch(`${API_URL}/todos`);
+    const todos = await res.json();
+
+    const todoList = document.getElementById('todoList');
+    todoList.innerHTML = todos.map(todo =>
+      `<div class="todo-item ${todo.completed ? 'completed' : ''}">
+        <strong>ID:</strong> ${todo._id} - ${todo.title}
+      </div>`
+    ).join('');
+
+  } catch (error) {
+    console.error('Failed to fetch todos:', error);
+  }
+});
+
+    // Add a new todo
+    document.getElementById('addTodoBtn').addEventListener('click', async () => {
+      const title = document.getElementById('todoTitle').value;
+      if (title) {
+        try {
+          const res = await fetch(`${API_URL}/todos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title })
+          });
+          const newTodo = await res.json();
+
+          console.log('Added todo:', newTodo);
+          document.getElementById('todoTitle').value = '';
+        } catch (error) {
+          console.error('Failed to add todo:', error);
+        }
+      }
+    });
+
+    // Update a todo by ID
+    document.getElementById('updateTodoBtn').addEventListener('click', async () => {
+      const id = document.getElementById('todoId').value;
+      const completed = document.getElementById('todoCompleted').checked;
+
+      if (id) {
+        try {
+          const res = await fetch(`${API_URL}/todos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed })
+          });
+          const updatedTodo = await res.json();
+
+          console.log('Updated todo:', updatedTodo);
+        } catch (error) {
+          console.error('Failed to update todo:', error);
+        }
+      }
+    });
+
+    // Delete a todo by ID
+    document.getElementById('deleteTodoBtn').addEventListener('click', async () => {
+      const id = document.getElementById('todoId').value;
+
+      if (id) {
+        try {
+          await fetch(`${API_URL}/todos/${id}`, { method: 'DELETE' });
+          console.log('Deleted todo with ID:', id);
+        } catch (error) {
+          console.error('Failed to delete todo:', error);
+        }
+      }
+    });
+  </script>
+
 </body>
 </html>
